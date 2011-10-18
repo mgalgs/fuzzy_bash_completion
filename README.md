@@ -14,3 +14,6 @@ mode, etc.
 When matches are found, the longest common substring starting from the
 beginning of each match is placed at your cursor. This results in
 undesired behavior like deleting backward as you try to complete.
+
+Doesn't yet play nicely with default bash completion for variable
+names.

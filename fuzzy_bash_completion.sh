@@ -1,5 +1,5 @@
 # set to 1 to enable logging output:
-_fuzzy_debug=1
+_fuzzy_debug=0
 
 
 ### First, some debugging routines ###
@@ -28,6 +28,12 @@ _fuzzy_complete()
     current_word="$2"
     prev_word="$1"
 
+    # if they're expanding a variable get out of here:
+    if [[ ${current_word:0:1} == '$' ]]; then
+	COMPREPLY=""
+	return 1
+    fi
+
     if [[ -d $current_word ]]; then
 	# hack to deal with trailing spaces and such: use dirname with
 	# a phoney basename. We might be adding an extra / but dirname
@@ -38,6 +44,8 @@ _fuzzy_complete()
 	target_dir=$(dirname $current_word)
 	target_word=$(basename $current_word | tr -d -C '[a-zA-Z0-9_\-]')
     fi
+    # make sure everything (like ~) is expanded:
+    eval target_dir=$target_dir
     _fuzzy_log_var target_dir
     _fuzzy_log_var target_word
 
@@ -80,5 +88,5 @@ _fuzzy_complete()
 ### End main completion routine ###
 
 # set up the bash completion machinery
-complete -D -o bashdefault -o default -o filenames -F _fuzzy_complete
+complete -D -o bashdefault -o default -o filenames -o nospace -F _fuzzy_complete
 # complete -D -o bashdefault -o default -o nospace -F _fuzzy_complete
