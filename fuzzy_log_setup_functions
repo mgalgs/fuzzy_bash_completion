@@ -1,0 +1,166 @@
+#!/bin/bash
+#
+# fuzzy_log_setup_functions - a set of functions to facilitate setting
+# up fuzzy_log_completion
+
+declare -A _fuzzy_replaced_specs
+
+
+
+# function _fuzzy_find_compspec_by_pattern
+#
+# find existing compspec by regex pattern
+#
+# params :
+# 1      : the regex to search for (e.g. " -F _filedir_xspec")
+#
+# return values :
+#  - echo       : the compspec
+#  - return     : 0 on success, 1 on failure
+_fuzzy_find_compspec_by_pattern()
+{
+    local the_pattern="$1"
+    complete | {
+        while read myline; do
+            # see if the function matches
+            if [[ $myline =~ $the_pattern ]]; then
+                echo $myline
+                return 0
+            fi
+        done
+    }
+    return 1
+}
+
+# function _fuzzy_find_compspec_by_function
+#
+# find existing compspec by function
+#
+# params :
+# 1      : the function to search for (e.g. _filedir_xspec)
+#
+# return values :
+#  - echo       : the compspec
+#  - return     : 0 on success, 1 on failure
+_fuzzy_find_compspec_by_function()
+{
+    local stuff retval
+    stuff=$( _fuzzy_find_compspec_by_function " -F $1" )
+    retval=$?
+    echo $stuff
+    return $retval
+}
+
+
+# function _fuzzy_find_compspec_by_command
+#
+# find existing compspec by command
+#
+# params :
+# 1      : the command to search for (e.g. ls)
+#
+# returns   :
+#  - echo   : the compspec
+#  - return : 0 on success, 1 on failure
+_fuzzy_find_compspec_by_command()
+{
+    local stuff retval
+    stuff=$( _fuzzy_find_compspec_by_function "$1\$" )
+    retval=$?
+    echo $stuff
+    return $retval
+}
+
+# function _fuzzy_extract_command_from_compspec
+#
+# Extracts the command out of a compspec (the last word in the compspec)
+#
+# params :
+# 1      : the compspec line (e.g. "complete -o default -F _longopt mv")
+#
+# returns :
+#  - echo : the command
+_fuzzy_extract_command_from_compspec()
+{
+    echo -n $( expr "$1" : '.*\( [^ ]\+$\)' )
+}
+
+# function _fuzzy_extract_function_from_compspec
+#
+# Extracts the function out of a compspec (the thing following a -F)
+#
+# params :
+# 1      : the compspec line (e.g. "complete -o default -F _longopt mv")
+#
+# returns :
+#  - echo : the function
+_fuzzy_extract_function_from_compspec()
+{
+    echo -n $( expr "$1" : '.*\-F \([^ ]\+\) .*' )
+}
+
+
+# function _fuzzy_replace_specs
+# 
+# replace existing completion spec functions with _fuzzy_complete The
+# replaced compspecs are saved in _fuzzy_replaced_specs for possible
+# later restoration.
+#
+# params :
+# 1      : the existing compspec to replace (something like _filedir_xspec)
+_fuzzy_replace_specs()
+{
+    local existing_spec="$1" this_command this_function
+    complete | {
+        while read myline; do
+            this_function=$( _fuzzy_extract_function_from_compspec $myline )
+            this_command=$( _fuzzy_extract_command_from_compspec $myline )
+            # key will look something like: "_filedir_xspec xdvi"
+            _fuzzy_replaced_specs["$this_spec $the_command"]=$myline
+            # set up our new completion:
+            complete -o bashdefault -o default -o filenames -o nospace -F _fuzzy_complete $this_command
+        done
+    }
+}
+
+# function _fuzzy_setup_for_command
+#
+# sets up fuzzy completion for a specific command
+#
+# params :
+# 1      : the command for which we want to set up fuzzy completion
+#          (e.g. ls)
+_fuzzy_setup_for_command()
+{
+    local the_command="$1"
+    complete | {
+        while read myline; do
+            this_command=$( _fuzzy_extract_command_from_compspec $myline )
+            [[ $this_command == $the_command ]] || continue
+            echo "TODO: replacing $myline"
+        done
+    }
+}
+
+# function fuzzy_restore_all_specs
+#
+# Attempts to restore any specs that have been replaced by
+# _fuzzy_replace_specs
+fuzzy_restore_all_specs()
+{
+    
+}
+
+fuzzy_replace_filedir_xpec()
+{
+    _fuzzy_replace_specs _filedir_xpec
+}
+
+
+
+# Local variables:
+# mode: shell-script
+# sh-basic-offset: 4
+# indent-tabs-mode: nil
+# End:
+# ex: ts=4 sw=4 et filetype=sh

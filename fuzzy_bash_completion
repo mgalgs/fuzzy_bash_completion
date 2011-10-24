@@ -1,3 +1,10 @@
+#!/bin/bash
+#
+# fuzzy_bash_completion - fuzzy bash completion
+#
+# Requires bash >= 4
+
+
 # set to 0 to disable logging output:
 _fuzzy_debug=0
 # ignoring case slows things down a bit
@@ -10,6 +17,17 @@ _fuzzy_log()
     echo $1 >> ~/.fuzzy_complete_log.txt
 }
 
+# Helper function to log the value of an array
+_fuzzy_log_arr()
+{
+    local -a thearray=("${!1}")
+    local k arrname=${1/'[@]'/}
+    for k in ${!thearray[@]}; do
+        _fuzzy_log "${arrname}[$k] is ${thearray[$k]}"
+    done
+}
+
+# Helper function to log the value of a variable
 _fuzzy_log_var()
 {
     [[ $_fuzzy_debug -ne 1 ]] && return
@@ -20,16 +38,13 @@ _fuzzy_log_var()
 ### Helpers ###
 _fuzzy_upcase()
 {
-    if [[ ${BASH_VERSINFO[0]} -ge 4 ]]; then
-        echo ${1^^}
-    else
-        tr '[:upper:]' '[:lower:]' <<<${1}
-    fi
+    echo ${1^^}
 }
 
-_fuzzy_complete_matches()
+_fuzzy_complete_find_matches()
 {
-    local allfiles filteredfiles match_pattern target_dir
+    local allfiles match_pattern target_dir
+    local -a filteredfiles
     allfiles=$1
     match_pattern=$2
     if [[ $3 == "." || "$3" == "" ]]; then
@@ -60,7 +75,7 @@ _fuzzy_complete_matches()
 ### The main completion routine ###
 _fuzzy_complete()
 {
-    local files cur prev target_dir target_word filteredfiles allfiles match_pattern
+    local files cur prev target_dir target_word filteredfiles allfiles match_pattern tails cnt tmp
     # Available variables:
     # COMP_LINE COMP_POINT COMP_KEY COMP_TYPE COMP_WORDS COMP_CWORD
     # $1 : name of command whose arguments are being completed
@@ -110,12 +125,20 @@ _fuzzy_complete()
     # allfiles=$( command ls -A $target_dir )
     allfiles=$( command ls $target_dir )
     _fuzzy_log_var allfiles
-    filteredfiles=$( _fuzzy_complete_matches "$allfiles" "$match_pattern" "$target_dir" )
-    _fuzzy_log_var filteredfiles
-    COMPREPLY=($filteredfiles)
+    filteredfiles=( $( _fuzzy_complete_find_matches "$allfiles" "$match_pattern" "$target_dir" ) )
+    _fuzzy_log_arr filteredfiles[@]
+    COMPREPLY=( ${filteredfiles[@]} )
+    _fuzzy_log ""               # some logfile spacing
+    # COMPREPLY=( $filteredfiles ) 
 }
 ### End main completion routine ###
 
 # set up the bash completion machinery
-complete -D -o bashdefault -o default -o filenames -o nospace -F _fuzzy_complete
-# complete -D -o bashdefault -o default -o nospace -F _fuzzy_complete
+# complete -D -o bashdefault -o default -o filenames -o nospace -F _fuzzy_complete
+
+# Local variables:
+# mode: shell-script
+# sh-basic-offset: 4
+# indent-tabs-mode: nil
+# End:
+# ex: ts=4 sw=4 et filetype=sh
