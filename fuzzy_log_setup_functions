@@ -184,6 +184,7 @@ _fuzzy_replace_compspecs_by_command()
 # stderr to /dev/null (i.e. fuzzy_list_replaced_specs 2>/dev/null )
 fuzzy_list_replaced_specs()
 {
+    local compspec
     echo "    All replaced compspecs:" 1>&2
     echo "==============================="  1>&2
     echo "" 1>&2
@@ -203,12 +204,12 @@ fuzzy_list_replaced_specs()
 # _fuzzy_replace_compspecs_by_function
 fuzzy_restore_all_specs()
 {
-    for compspec in "${_fuzzy_replaced_specs[@]}"; do
-        echo "restoring compspec $compspec"
-        eval $compspec
+    local key
+    for key in "${!_fuzzy_replaced_specs[@]}"; do
+        echo "restoring ${_fuzzy_replaced_specs[$key]}"
+        eval ${_fuzzy_replaced_specs["$key"]}
+        unset _fuzzy_replaced_specs["$key"]
     done
-    unset _fuzzy_replaced_specs
-    declare -A _fuzzy_replaced_specs
 }
 
 # function fuzzy_setup_for_command
