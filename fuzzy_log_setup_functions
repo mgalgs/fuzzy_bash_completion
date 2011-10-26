@@ -5,7 +5,8 @@
 
 declare -A _fuzzy_replaced_specs
 
-
+# the options used to set up the completion:
+_fuzzy_complete_options="-o bashdefault -o default -o filenames -o nospace -v -F _fuzzy_complete"
 
 # function _fuzzy_find_compspec_by_pattern
 #
@@ -71,6 +72,23 @@ _fuzzy_find_compspec_by_command()
     return $retval
 }
 
+# function _fuzzy_re_extract_first
+#
+# Extracts the first match of the regex
+#
+# params :
+# 1      : the text against which we'll test our regex
+# 2      : the regex (should contain one match group)
+#
+# returns :
+#  - echo : the matched text
+_fuzzy_re_extract_first()
+{
+    if [[ "$1" =~ $2 ]]; then
+        echo -n ${BASH_REMATCH[1]}
+    fi
+}
+
 # function _fuzzy_extract_command_from_compspec
 #
 # Extracts the command out of a compspec (the last word in the compspec)
@@ -82,7 +100,7 @@ _fuzzy_find_compspec_by_command()
 #  - echo : the command
 _fuzzy_extract_command_from_compspec()
 {
-    echo -n $( expr "$1" : '.*\( [^ ]\+$\)' )
+    echo -n $( _fuzzy_re_extract_first "$1" ".*( [^ ]+$)" )
 }
 
 # function _fuzzy_extract_function_from_compspec
@@ -96,64 +114,123 @@ _fuzzy_extract_command_from_compspec()
 #  - echo : the function
 _fuzzy_extract_function_from_compspec()
 {
-    echo -n $( expr "$1" : '.*\-F \([^ ]\+\) .*' )
+    echo -n $( _fuzzy_re_extract_first "$1" ".*-F ([^ ]+) .*" )
 }
 
 
-# function _fuzzy_replace_specs
+# function _fuzzy_replace_compspecs_by_function
 # 
-# replace existing completion spec functions with _fuzzy_complete The
+# replace existing completion spec functions with _fuzzy_complete. The
 # replaced compspecs are saved in _fuzzy_replaced_specs for possible
-# later restoration.
+# later restoration. If no existing compspecs are found for the given
+# function, nothing happens.
 #
 # params :
-# 1      : the existing compspec to replace (something like _filedir_xspec)
-_fuzzy_replace_specs()
+# 1      : the existing compspec function to replace
+#          (something like _filedir_xspec)
+_fuzzy_replace_compspecs_by_function()
 {
     local existing_spec="$1" this_command this_function
-    complete | {
-        while read myline; do
-            this_function=$( _fuzzy_extract_function_from_compspec $myline )
-            this_command=$( _fuzzy_extract_command_from_compspec $myline )
-            # key will look something like: "_filedir_xspec xdvi"
-            _fuzzy_replaced_specs["$this_spec $the_command"]=$myline
-            # set up our new completion:
-            complete -o bashdefault -o default -o filenames -o nospace -F _fuzzy_complete $this_command
-        done
-    }
+
+    while read myline; do
+        this_function=$( _fuzzy_extract_function_from_compspec "$myline" )
+        [[ -n "$this_function" && $this_function == $existing_spec ]] \
+            || continue
+        echo "replacing $myline"
+        this_command=$( _fuzzy_extract_command_from_compspec "$myline" )
+        # key will look something like: "_filedir_xspec xdvi"
+        _fuzzy_replaced_specs["$this_function $this_command"]="$myline"
+        # set up our new completion:
+        complete $_fuzzy_complete_options $this_command
+        # we might have more to replace. keep going...
+    done < <( complete )
 }
 
-# function _fuzzy_setup_for_command
+# function _fuzzy_replace_compspecs_by_command
 #
-# sets up fuzzy completion for a specific command
+# sets up fuzzy completion for a specific command. If no existing
+# compsec is found for the given command, the completion is still set
+# up.
 #
 # params :
 # 1      : the command for which we want to set up fuzzy completion
 #          (e.g. ls)
-_fuzzy_setup_for_command()
+_fuzzy_replace_compspecs_by_command()
 {
-    local the_command="$1"
-    complete | {
-        while read myline; do
-            this_command=$( _fuzzy_extract_command_from_compspec $myline )
-            [[ $this_command == $the_command ]] || continue
-            echo "TODO: replacing $myline"
-        done
-    }
+    local existing_command="$1" this_command this_function
+    # foreach line in the output of `complete`
+    while read myline; do
+        this_command=$( _fuzzy_extract_command_from_compspec "$myline" )
+        [[ -n "$this_command" && $this_command == $existing_command ]] \
+            || continue
+        echo "replacing $myline"
+        this_function=$( _fuzzy_extract_function_from_compspec "$myline" )
+            # key will look something like: "_filedir_xspec xdvi"
+        _fuzzy_replaced_specs["$this_function $this_command"]="$myline"
+            # set up our new completion:
+        complete $_fuzzy_complete_options $existing_command
+            # there should only be one compspec per command, so we're done
+        return
+    done < <( complete )
+    echo "No existing compspecs for ${existing_command}. Setting up new compspec."
+    complete $_fuzzy_complete_options $existing_command
+}
+
+# function fuzzy_list_replaced_specs
+#
+# Lists all compspecs that have been replaced by the functions found
+# in fuzzy_log_setup_functions. If you just want to see the specs
+# (without all the header and footer mumbo jumbo), just redirect
+# stderr to /dev/null (i.e. fuzzy_list_replaced_specs 2>/dev/null )
+fuzzy_list_replaced_specs()
+{
+    echo "    All replaced compspecs:" 1>&2
+    echo "==============================="  1>&2
+    echo "" 1>&2
+    [[ ${#_fuzzy_replaced_specs[@]} -eq 0 ]] && echo " ...None..." && return
+    for compspec in "${_fuzzy_replaced_specs[@]}"; do
+        echo " :: $compspec"
+    done
+    echo ""  1>&2
+    echo "==============================="  1>&2
+    echo "To restore these compspecs, use"  1>&2
+    echo "fuzzy_restore_all_specs" 1>&2
 }
 
 # function fuzzy_restore_all_specs
 #
 # Attempts to restore any specs that have been replaced by
-# _fuzzy_replace_specs
+# _fuzzy_replace_compspecs_by_function
 fuzzy_restore_all_specs()
 {
-    
+    for compspec in "${_fuzzy_replaced_specs[@]}"; do
+        echo "restoring compspec $compspec"
+        eval $compspec
+    done
+    unset _fuzzy_replaced_specs
+    declare -A _fuzzy_replaced_specs
 }
 
-fuzzy_replace_filedir_xpec()
+# function fuzzy_setup_for_command
+#
+# Sets up fuzzy completion for the given command. This function is a
+# shamelessly naive frontend to _fuzzy_replace_compspecs_by_command.
+#
+# params :
+# 1      : the command for which we want to set up fuzzy completion
+fuzzy_setup_for_command()
 {
-    _fuzzy_replace_specs _filedir_xpec
+    _fuzzy_replace_compspecs_by_command $1
+}
+
+# function fuzzy_replace_filedir_xspec
+#
+# Replaces the _filedir_xspec compspec function that ships with the
+# bash_completion package and takes care of general filedir
+# completion (a good candidate for fuzzy completion!)
+fuzzy_replace_filedir_xspec()
+{
+    _fuzzy_replace_compspecs_by_function _filedir_xspec
 }
 
 

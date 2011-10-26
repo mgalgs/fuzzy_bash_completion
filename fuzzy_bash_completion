@@ -6,7 +6,7 @@
 
 
 # set to 0 to disable logging output:
-_fuzzy_debug=0
+_fuzzy_debug=1
 # ignoring case slows things down a bit
 _fuzzy_ignore_case=1
 
@@ -17,7 +17,8 @@ _fuzzy_log()
     echo $1 >> ~/.fuzzy_complete_log.txt
 }
 
-# Helper function to log the value of an array
+# Helper function to log the value of an array. Associative arrays are
+# not supported.
 _fuzzy_log_arr()
 {
     local -a thearray=("${!1}")
@@ -122,8 +123,8 @@ _fuzzy_complete()
         return 1
     fi
 
-    # allfiles=$( command ls -A $target_dir )
-    allfiles=$( command ls $target_dir )
+
+    allfiles=$( command ls -B $target_dir )
     _fuzzy_log_var allfiles
     filteredfiles=( $( _fuzzy_complete_find_matches "$allfiles" "$match_pattern" "$target_dir" ) )
     _fuzzy_log_arr filteredfiles[@]
