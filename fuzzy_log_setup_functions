@@ -223,6 +223,18 @@ fuzzy_setup_for_command()
     _fuzzy_replace_compspecs_by_command $1
 }
 
+# function fuzzy_setup_replace_compspec_function
+#
+# Sets up fuzzy completion for the given command. This function is a
+# shamelessly naive frontend to _fuzzy_replace_compspecs_by_function.
+#
+# params :
+# 1      : the compspec function we want to replace with fuzzy
+fuzzy_setup_replace_compspec_function()
+{
+    _fuzzy_replace_compspecs_by_function $1
+}
+
 # function fuzzy_replace_filedir_xspec
 #
 # Replaces the _filedir_xspec compspec function that ships with the
@@ -230,7 +242,7 @@ fuzzy_setup_for_command()
 # completion (a good candidate for fuzzy completion!)
 fuzzy_replace_filedir_xspec()
 {
-    _fuzzy_replace_compspecs_by_function _filedir_xspec
+    fuzzy_setup_replace_compspec_function _filedir_xspec
 }
 
 
