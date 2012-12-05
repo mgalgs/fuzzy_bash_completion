@@ -8,7 +8,6 @@ mode, etc.
 ## Usage
 ### Load the fuzzy functions
     source fuzzy_bash_completion
-    source fuzzy_log_setup_functions
 
 ### Set up completion
 #### Using an easy-setup function

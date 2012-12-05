@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# fuzzy_log_setup_functions - a set of functions to facilitate setting
-# up fuzzy_log_completion
+# fuzzy_setup_functions - a set of functions to facilitate setting
+# up fuzzy completion
 
 declare -A _fuzzy_replaced_specs
 
@@ -179,7 +179,7 @@ _fuzzy_replace_compspecs_by_command()
 # function fuzzy_list_replaced_specs
 #
 # Lists all compspecs that have been replaced by the functions found
-# in fuzzy_log_setup_functions. If you just want to see the specs
+# in fuzzy_setup_functions. If you just want to see the specs
 # (without all the header and footer mumbo jumbo), just redirect
 # stderr to /dev/null (i.e. fuzzy_list_replaced_specs 2>/dev/null )
 fuzzy_list_replaced_specs()

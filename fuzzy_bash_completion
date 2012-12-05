@@ -127,15 +127,15 @@ _fuzzy_complete()
     allfiles=$( command ls -B $target_dir )
     _fuzzy_log_var allfiles
     filteredfiles=( $( _fuzzy_complete_find_matches "$allfiles" "$match_pattern" "$target_dir" ) )
-    _fuzzy_log_arr filteredfiles[@]
+    # _fuzzy_log_arr filteredfiles[@]
     COMPREPLY=( ${filteredfiles[@]} )
     _fuzzy_log ""               # some logfile spacing
     # COMPREPLY=( $filteredfiles ) 
 }
 ### End main completion routine ###
 
-# set up the bash completion machinery
-# complete -D -o bashdefault -o default -o filenames -o nospace -F _fuzzy_complete
+# helpers to set up the bash completion machinery:
+source fuzzy_setup_functions
 
 # Local variables:
 # mode: shell-script
