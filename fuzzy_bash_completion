@@ -50,6 +50,8 @@ _fuzzy_complete_find_matches()
     match_pattern=$2
     if [[ $3 == "." || "$3" == "" ]]; then
         target_dir=""
+    elif [[ $3 =~ ^/+$ ]]; then
+        target_dir=/
     else
         target_dir="$(dirname ${3}/phoney)/"
     fi
@@ -93,10 +95,17 @@ _fuzzy_complete()
     fi
 
     if [[ -d $cur ]]; then
-    # hack to deal with trailing spaces and such: use dirname with
-    # a phoney basename. We might be adding an extra / but dirname
-    # deals with all that
-        target_dir=$(dirname "$cur/phoney")
+        # hack to deal with trailing spaces and such: use dirname with
+        # a phoney basename. We might be adding an extra / but dirname
+        # deals with all that. However, if $cur is just `/', then
+        # basename leaves a `trailing slash' (it's the only slash,
+        # leading and trailing).
+        if [[ $cur =~ ^/+$ ]]; then
+            _fuzzy_log "rooting around"
+            target_dir=/
+        else
+            target_dir=$(dirname "$cur/phoney")
+        fi
         target_word=""
     else
         target_dir=$(dirname $cur)
@@ -110,7 +119,7 @@ _fuzzy_complete()
     # default match pattern is .* between every letter:
     match_pattern=""
     for (( i=0; i < ${#target_word}; i++ )); do
-    # append the ith character to the match pattern along with another .*
+        # append the ith character to the match pattern along with another .*
         match_pattern="${match_pattern}.*${target_word:${i}:1}"
     done
     # trailing .*
