@@ -5,8 +5,8 @@
 # Requires bash >= 4
 
 
-# set to 0 to disable logging output:
-_fuzzy_debug=1
+# set to 0 to disable logging output
+_fuzzy_debug=${_fuzzy_debug:-0}
 # ignoring case slows things down a bit
 _fuzzy_ignore_case=1
 
