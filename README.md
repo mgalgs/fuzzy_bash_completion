@@ -7,19 +7,30 @@ mode, etc.
 
 ## Usage
 ### Load the fuzzy functions
+
     source fuzzy_bash_completion
 
 ### Set up completion
 #### Using an easy-setup function
-    fuzzy_replace_filedir_xspec # good if you're using the bash_completion package
+
+    fuzzy_replace_filedir_xspec
+
+(Good if you're using the `bash_completion` package).
 
 #### For individual commands
-    fuzzy_setup_for_command cd # set up fuzzy completion for cd
+
+Set up fuzzy completion for cd:
+
+    fuzzy_setup_for_command cd
 
 #### Replace compspec functions directly
-    fuzzy_setup_replace_compspec_function _cd # replace all compspecs that use _cd
+
+Replace all compspecs that use _cd
+
+    fuzzy_setup_replace_compspec_function _cd
 
 ### Revert back to original completion specs
+
 You can list all the compspecs currently using fuzzy completion with:
 
     fuzzy_list_replaced_specs
