@@ -285,7 +285,6 @@ _fuzzy_replace_compspecs_by_function()
         this_function=$( _fuzzy_extract_function_from_compspec "$myline" )
         [[ -n "$this_function" && $this_function == $existing_spec ]] \
             || continue
-        echo "replacing $myline"
         this_command=$( _fuzzy_extract_command_from_compspec "$myline" )
         # key will look something like: "_filedir_xspec xdvi"
         _fuzzy_replaced_specs["$this_function $this_command"]="$myline"
@@ -312,7 +311,6 @@ _fuzzy_replace_compspecs_by_command()
         this_command=$( _fuzzy_extract_command_from_compspec "$myline" )
         [[ -n "$this_command" && $this_command == $existing_command ]] \
             || continue
-        echo "replacing $myline"
         this_function=$( _fuzzy_extract_function_from_compspec "$myline" )
         # key will look something like: "_filedir_xspec xdvi"
         _fuzzy_replaced_specs["$this_function $this_command"]="$myline"
