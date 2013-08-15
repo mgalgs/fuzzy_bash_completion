@@ -314,11 +314,11 @@ _fuzzy_replace_compspecs_by_command()
             || continue
         echo "replacing $myline"
         this_function=$( _fuzzy_extract_function_from_compspec "$myline" )
-            # key will look something like: "_filedir_xspec xdvi"
+        # key will look something like: "_filedir_xspec xdvi"
         _fuzzy_replaced_specs["$this_function $this_command"]="$myline"
-            # set up our new completion:
+        # set up our new completion:
         complete $_fuzzy_complete_options $existing_command
-            # there should only be one compspec per command, so we're done
+        # there should only be one compspec per command, so we're done
         return
     done < <( complete )
     echo "No existing compspecs for ${existing_command}. Setting up new compspec."
