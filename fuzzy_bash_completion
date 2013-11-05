@@ -291,7 +291,7 @@ _fuzzy_replace_compspecs_by_function()
         # set up our new completion:
         complete $_fuzzy_complete_options $this_command
         # we might have more to replace. keep going...
-    done < <( complete )
+    done < <( complete | grep $1 )
 }
 
 # function _fuzzy_replace_compspecs_by_command
@@ -318,7 +318,7 @@ _fuzzy_replace_compspecs_by_command()
         complete $_fuzzy_complete_options $existing_command
         # there should only be one compspec per command, so we're done
         return
-    done < <( complete )
+    done < <( complete | grep $1 )
     echo "No existing compspecs for ${existing_command}. Setting up new compspec."
     complete $_fuzzy_complete_options $existing_command
 }
