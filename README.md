@@ -14,6 +14,10 @@ For example:
     cd zz<TAB>
     # completes the word `pizza'
 
+## Requirements
+
+You must be using `bash >= 4.0` for this package to work since it relies
+on [associative arrays](http://www.gnu.org/software/bash/manual/html_node/Arrays.html).
 
 ## Usage
 
