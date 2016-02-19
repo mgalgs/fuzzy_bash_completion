@@ -16,8 +16,10 @@ For example:
 
 ## Requirements
 
-You must be using `bash >= 4.0` for this package to work since it relies
-on [associative arrays](http://www.gnu.org/software/bash/manual/html_node/Arrays.html).
+  - `bash >= 4.0` (since we need
+    [associative arrays](http://www.gnu.org/software/bash/manual/html_node/Arrays.html)).
+  - The `bash-completion` package (could have a different name on your
+    distro).
 
 ## Usage
 
@@ -49,22 +51,6 @@ like so:
 You can list all of the fuzzy compspecs with:
 
     fuzzy_list_replaced_specs
-
-### `fuzzy_replace_filedir_xspec` not working
-
-If the `fuzzy_replace_filedir_xspec` doesn't actually set up any fuzzy
-completion you might not be using the `bash_completion` package. You
-can check if you're using `bash_completion` by running the following
-command:
-
-    complete | grep -q _filedir_xspec && echo yes
-
-If this command outputs "yes" then you are (most likely) using
-`bash_completion`. If you're not using `bash_completion` then you'll
-have to set up fuzzy completion on a per-command basis or find some
-other compspec to override (see the source of
-`fuzzy_replace_filedir_xspec` (hint:
-`fuzzy_setup_replace_compspec_function`)).
 
 ### Revert back to original completion specs (debugging and development)
 
