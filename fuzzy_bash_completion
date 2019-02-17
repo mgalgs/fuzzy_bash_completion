@@ -94,6 +94,12 @@ _fuzzy_complete()
         return 1
     fi
 
+    # bail if there's nothing to complete
+    if [[ -z "$cur" ]]; then
+        COMPREPLY=""
+        return 1
+    fi
+
     if [[ -d $cur ]]; then
         # hack to deal with trailing spaces and such: use dirname with
         # a phoney basename. We might be adding an extra / but dirname
