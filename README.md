@@ -31,18 +31,22 @@ Put the following in your `~/.bashrc`:
 
     source /path/to/fuzzy_bash_completion
 
-And now you'll probably only need one more line in your `~/.bashrc`
-and I'll give you a hint, it's probably this one:
+Now you can start enabling fuzzy completion for individual commands like
+so:
+
+    fuzzy_setup_for_command cd
+
+Either interactively or by adding it to your `~/.bashrc`.
+
+There are a few helper functions to set up fuzzy completion for known
+commands in bulk.  However, these helper functions only work on certain
+versions of bash completion, so YMMV.
 
     fuzzy_replace_filedir_xspec
 
-Beyond that, you might want to also enable fuzzy completion for `cd`,
-`ls` or any other command that `filedir_xspec` doesn't cover (run
-`fuzzy_list_replaced_specs` to see all the commands using fuzzy
-completion). You can enable fuzzy completion for specific commands
-like so:
+To list all commands currently using fuzzy completion, run:
 
-    fuzzy_setup_for_command cd
+    fuzzy_list_replaced_specs
 
 ## Troubleshooting
 
