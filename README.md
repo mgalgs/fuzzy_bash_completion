@@ -19,7 +19,8 @@ For example:
   - `bash >= 4.0` (since we need
     [associative arrays](http://www.gnu.org/software/bash/manual/html_node/Arrays.html)).
   - The `bash-completion` package (could have a different name on your
-    distro).
+    distro).  Please follow the instructions specific to your distro for
+    installing and enabling `bash-completion`.
 
 ## Usage
 
